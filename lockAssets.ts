@@ -1,4 +1,5 @@
 // Import Mesh SDK core utilities
+import "https://deno.land/std@0.224.0/dotenv/load.ts";
 import {
   Blockfrost,
   Data,
@@ -7,7 +8,15 @@ import {
   TxHash,
   Address,
   paymentCredentialOf,
-} from "https://deno.land/x/lucid/mod.ts";
+} from "https://deno.land/x/lucid@0.20.12/mod.ts";
+// import { generateSeedPhrase } 
+//   from "https://deno.land/x/lucid@0.20.12/deno/misc/bip39.ts";
+// const mnemonic = generateSeedPhrase();
+// console.log("Seed phrase:", mnemonic);
+import "https://deno.land/std@0.224.0/dotenv/load.ts";
+
+
+
 
 
 // Load environment variables
@@ -26,13 +35,12 @@ if (missing.length > 0) {
 
 
 // Initialize Lucid
-const lucid = await Lucid.new(
-  new Blockfrost(
+const lucid = new Lucid({
+  provider: new Blockfrost(
     "https://cardano-preview.blockfrost.io/api/v0",
     BLOCKFROST_API_KEY,
   ),
-  "Preview",
-);
+});
 
 lucid.selectWalletFromSeed(SEED_PHRASES);
 
@@ -48,8 +56,14 @@ const script: SpendingValidator = {
   type: "PlutusV2",
   script: CBORHEX,
 };
+console.log("Lucid.utils keys:", Object.keys(lucid.utils));
+console.log("Type of validatorToAddress:", typeof lucid.utils.validatorToAddress);
 
-const contractAddress: Address = lucid.utils.validatorToAddress(script);
+
+const contractAddress = lucid.utils.scriptToAddress(script);
+
+
+
 console.log(`SC Address: ${contractAddress}`);
 
 
@@ -62,7 +76,6 @@ type DatumType = Data.Static<typeof DatumSchema>;
 
 
 
-
 // Function to lock assets
 async function lockAssets(
   lovelace: bigint,
@@ -70,33 +83,26 @@ async function lockAssets(
 ): Promise<TxHash> {
   const inlineDatum = Data.to<DatumType>(datumValue, DatumSchema);
 
-  // Build transaction
   const tx = await lucid
     .newTx()
-    .payToContract(
-      contractAddress,
-      { inline: inlineDatum },
-      { lovelace },
-    )
-    .complete();
+    .payToContract(contractAddress, { Inline: inlineDatum }, { lovelace })
+    .commit();
 
-  // Sign transaction
-  const signedTx = await tx.sign().complete();
-
-  // Submit transaction
+  const signedTx = await tx.sign().commit();
   const txHash = await signedTx.submit();
   return txHash;
 }
+
 
 // Main
 async function main() {
   try {
     const datumValue: DatumType = {
       owner: publicKeyHash ??
-        "00000000000000000000000000000000000000000000000000000000",
+        "12b31b55774f5e693ab06b2d9f7907fd6d895431e533fdf4c90416a5",
     };
 
-    const txHash = await lockAssets(1_000_000n, datumValue);
+    const txHash = await lockAssets(4_000_000n, datumValue);
     await lucid.awaitTx(txHash);
 
     console.log(`Tx Hash: ${txHash}`);
