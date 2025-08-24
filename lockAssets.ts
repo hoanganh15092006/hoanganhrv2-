@@ -99,7 +99,7 @@ async function main() {
   try {
     const datumValue: DatumType = {
       owner: publicKeyHash ??
-        "12b31b55774f5e693ab06b2d9f7907fd6d895431e533fdf4c90416a5",
+        "00000000000000000000000000000",
     };
 
     const txHash = await lockAssets(4_000_000n, datumValue);
