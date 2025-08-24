@@ -1,3 +1,2 @@
-SC Address: addr_test1wq7pkqcj8u0mxwt33s5999y79fhhnnqsc5xl9s4dthktl5qvcymmc
 lock Tx Hash: 2a5632f17583730c0eb37b784776e7b248c901af711c32a9bcecafc2d9503069
-Datum: {"owner":"12b31b55774f5e693ab06b2d9f7907fd6d895431e533fdf4c90416a5"}
+Unlock tx Hash: 5a77d614f61df92d26c147ff2aa95872c420e0e470bd29276c1fdaa009b4f024
